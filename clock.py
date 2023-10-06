@@ -7,6 +7,9 @@ import geocoder
 import os
 from PIL import Image, ImageTk
 
+# Place windows on separate screens
+# https://stackoverflow.com/questions/65007441/how-to-display-two-windows-in-two-different-display-with-tkinter
+
 # Timezones
 # https://gist.github.com/heyalexej/8bf688fd67d7199be4a1682b3eec7568
 NAT_TZ = "Europe/Madrid"
