@@ -23,12 +23,15 @@ img_num = 0
 frame = -1
 # location = geocoder.ip('me')
 
-def change_color():
-    window.configure(bg=BACKGROUND_COLOR)
-    for frm in window.winfo_children():
-        frm.configure(bg=BACKGROUND_COLOR)
-        for wid in frm.winfo_children():
-            wid.configure(bg=BACKGROUND_COLOR, fg=TEXT_COLOR)
+def change_color(top):
+    widgets = [top]
+    while len(widgets) > 0:
+        wid = widgets.pop(0)
+        for child in wid.winfo_children():
+                if isinstance(child, tk.Label):
+                    child.configure(fg=TEXT_COLOR)
+                child.configure(bg=BACKGROUND_COLOR)
+                widgets.append(child)
 
 def get_current_time(loc):
     return datetime.now(pytz.timezone(loc)).strftime("%#I:%M:%S %p")
@@ -54,16 +57,20 @@ def update_time():
         else:
             visit_lbl_time['text'] = time_until_visit()
     
-    window.after(100, update_time)
+    window2.after(100, update_time)
 
 # 500 400    500 400    500 400    500 400
 # 600 600    600 200    300 600    300 200
 def scale_photo(img):
     w, h = img.size
-    ratio = min(1280 / w, 400 / h)
+    # ratio = min(1280 / w, 400 / h)
+    print('vrootwidth: ', window2.winfo_width())
+    print('vrootheight: ', window2.winfo_height())
+
+    ratio = min(window2.winfo_width() / w, window2.winfo_height() / h)
     w *= ratio
     h *= ratio
-    return int(w), int(h)
+    return max(1, int(w)), max(1, int(h))
 
 def update_photo():
     global img_num
@@ -75,7 +82,7 @@ def update_photo():
     photos_lbl_img.configure(image=photos_img)
     photos_lbl_img.image = photos_img
 
-    window.after(SLIDESHOW_TIME, update_photo)
+    window2.after(SLIDESHOW_TIME, update_photo)
 
 def switch_frame(event = False):
     global frame
@@ -83,35 +90,41 @@ def switch_frame(event = False):
 
     if frame == 0:
         photos_frm.grid_forget()
-        t_frm.grid(row=2, column=0, sticky='nsew')
+        t_frm.grid(row=0, column=0, sticky='nsew')
     elif frame == 1:
         t_frm.grid_forget()
-        visit_frm.grid(row=2, column=0, sticky='nsew')
+        visit_frm.grid(row=0, column=0, sticky='nsew')
     else:
         visit_frm.grid_forget()
-        photos_frm.grid(row=2, column=0, sticky='nsew')
+        photos_frm.grid(row=0, column=0, sticky='nsew')
 
 
 ### WINDOW
-window = tk.Tk()
+window2 = tk.Tk()
+window2.title("Time In balls2")
+window2.geometry("1280x400")
+window2.rowconfigure(0, weight=1, minsize=400)
+window2.columnconfigure(0, weight=1, minsize=1280)
+
+window = tk.Toplevel(window2)
 window.title("Time In balls")
-window.geometry("1280x960")
-window.rowconfigure([0, 2], minsize=400)
-window.rowconfigure(1, minsize=160)
-window.columnconfigure(0, minsize=1280)
+window.geometry("1280x400")
+window.rowconfigure(0, weight=1, minsize=400)
+window.columnconfigure(0, weight=1, minsize=1280)
+
 
 
 ### NATALIA TIME
 n_frm = tk.Frame(master=window)
 n_frm.grid(row=0, column=0, sticky='nsew')
 
-n_lbl_date = tk.Label(master=n_frm, text=get_current_date(NAT_TZ), font=(FONT, 30, "bold"), foreground='white')
+n_lbl_date = tk.Label(master=n_frm, text=get_current_date(NAT_TZ), font=(FONT, 30, "bold"))
 n_lbl_date.place(relx=.5, rely=.2, anchor=tk.CENTER)
 
-n_lbl_time = tk.Label(master=n_frm, text=get_current_time(NAT_TZ),  font=(FONT, 70, "bold"), foreground='white')
+n_lbl_time = tk.Label(master=n_frm, text=get_current_time(NAT_TZ),  font=(FONT, 70, "bold"))
 n_lbl_time.place(relx=.5, rely=.5, anchor=tk.CENTER)
 
-n_lbl_loc = tk.Label(master=n_frm, text=NAT_CITY, font=(FONT, 30, "bold"), foreground='white')
+n_lbl_loc = tk.Label(master=n_frm, text=NAT_CITY, font=(FONT, 30, "bold"))
 n_lbl_loc.place(relx=.5, rely=.8, anchor=tk.CENTER)
 
 n_img = Image.open('test.png')
@@ -122,20 +135,21 @@ n_lbl_img.place(relx=.15, rely=.5, anchor=tk.CENTER)
 
 
 ### EMPTY FRAME
-empty_frm = tk.Frame(master=window)
-empty_frm.grid(row=1, column=0, sticky='nsew')
+# empty_frm = tk.Frame(master=window)
+# empty_frm.grid(row=1, column=0, sticky='nsew')
 
 
 ### TIM TIME
-t_frm = tk.Frame(master=window)
+t_frm = tk.Frame(master=window2)
+# t_frm.grid(row=0, column=0, sticky='nsew')
 
-t_lbl_date = tk.Label(master=t_frm, text=get_current_date(TIM_TZ), font=(FONT, 30, "bold"), foreground='white')
+t_lbl_date = tk.Label(master=t_frm, text=get_current_date(TIM_TZ), font=(FONT, 30, "bold"))
 t_lbl_date.place(relx=.5, rely=.2, anchor=tk.CENTER)
 
-t_lbl_time = tk.Label(master=t_frm, text=get_current_time(TIM_TZ), font=(FONT, 70, "bold"), foreground='white')
+t_lbl_time = tk.Label(master=t_frm, text=get_current_time(TIM_TZ), font=(FONT, 70, "bold"))
 t_lbl_time.place(relx=.5, rely=.5, anchor=tk.CENTER)
 
-t_lbl_loc = tk.Label(master=t_frm, text=TIM_CITY, font=(FONT, 30, "bold"), foreground='white')
+t_lbl_loc = tk.Label(master=t_frm, text=TIM_CITY, font=(FONT, 30, "bold"))
 t_lbl_loc.place(relx=.5, rely=.8, anchor=tk.CENTER)
 
 t_img = Image.open('test.png')
@@ -144,8 +158,9 @@ t_lbl_img = tk.Label(master=t_frm, image=t_img, borderwidth=0)
 t_lbl_img.place(relx=.15, rely=.5, anchor=tk.CENTER)
 
 
+
 ### VISIT
-visit_frm = tk.Frame(master=window)
+visit_frm = tk.Frame(master=window2)
 
 visit_lbl_time = tk.Label(master=visit_frm, text='' if VISIT_DATE < datetime.now() else time_until_visit(), font=(FONT, 40, "bold"), foreground='white')
 visit_lbl_time.place(relx=.5, rely=.45, anchor=tk.CENTER)
@@ -153,23 +168,35 @@ visit_lbl_time.place(relx=.5, rely=.45, anchor=tk.CENTER)
 visit_lbl_text = tk.Label(master=visit_frm, text='' if VISIT_DATE < datetime.now() else 'Until Tim Visits', font=(FONT, 50, "bold"), foreground='white')
 visit_lbl_text.place(relx=.5, rely=.7, anchor=tk.CENTER)
 
+# visit_frm.place()
 
 ### SLIDESHOW
-photos_frm = tk.Frame(master=window)
+photos_frm = tk.Frame(master=window2)
 img = Image.open(f'images/{IMG_LIST[img_num]}')
 img = img.resize(scale_photo(img))
 photos_img = ImageTk.PhotoImage(img)
 photos_lbl_img = tk.Label(master=photos_frm, image=photos_img, borderwidth=0)
 photos_lbl_img.place(relx=.5, rely=.5, anchor=tk.CENTER)
 
+# photos_frm.place()
 
-change_color()
+# change_color(window)
+change_color(window2)
 
 #REMOVE LATER
-empty_frm.configure(bg='white')
+# empty_frm.configure(bg='white')
+def exit_function():
+    # Put any cleanup here.  
+    window2.destroy()
 
-window.after(100, update_time)
-window.after(SLIDESHOW_TIME, update_photo)
+# window.attributes('-fullscreen', True)
+# window.state('zoomed')
+
+window2.after(100, update_time)
+window2.after(SLIDESHOW_TIME, update_photo)
 switch_frame()
 window.bind('a', switch_frame)
-window.mainloop()
+window2.bind('a', switch_frame)
+window.protocol('WM_DELETE_WINDOW', exit_function)
+window2.mainloop()
+# window2.mainloop()
