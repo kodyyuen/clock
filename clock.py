@@ -6,6 +6,7 @@ import pytz
 import geocoder
 import os
 from PIL import Image, ImageTk
+import pong
 
 # Place windows on separate screens
 # https://stackoverflow.com/questions/65007441/how-to-display-two-windows-in-two-different-display-with-tkinter
@@ -24,6 +25,8 @@ FONT = "Arial" # https://stackoverflow.com/questions/39614027/list-available-fon
 IMG_LIST = os.listdir('./images')
 img_num = 0
 frame = -1
+scores = []
+end_screen = False
 # location = geocoder.ip('me')
 
 def change_color(top):
@@ -76,31 +79,53 @@ def scale_photo(img):
     return max(1, int(w)), max(1, int(h))
 
 def update_photo():
-    global img_num
-    img_num = (img_num + 1) % len(IMG_LIST)
+    if frame == 2:
+        global img_num
+        img_num = (img_num + 1) % len(IMG_LIST)
 
-    img = Image.open(f'images/{IMG_LIST[img_num]}')
-    img = img.resize(scale_photo(img))
-    photos_img = ImageTk.PhotoImage(img)
-    photos_lbl_img.configure(image=photos_img)
-    photos_lbl_img.image = photos_img
+        img = Image.open(f'images/{IMG_LIST[img_num]}')
+        img = img.resize(scale_photo(img))
+        photos_img = ImageTk.PhotoImage(img)
+        photos_lbl_img.configure(image=photos_img)
+        photos_lbl_img.image = photos_img
 
     window2.after(SLIDESHOW_TIME, update_photo)
 
 def switch_frame(event = False):
     global frame
-    frame = (frame + 1) % 3
+    frame = (frame + 1) % 4
 
     if frame == 0:
-        photos_frm.grid_forget()
+        game_frm.grid_forget()
         t_frm.grid(row=0, column=0, sticky='nsew')
     elif frame == 1:
         t_frm.grid_forget()
         visit_frm.grid(row=0, column=0, sticky='nsew')
-    else:
+    elif frame == 2:
         visit_frm.grid_forget()
         photos_frm.grid(row=0, column=0, sticky='nsew')
+    elif frame == 3:
+        photos_frm.grid_forget()
 
+        play_again()
+        game_frm.grid(row=0, column=0, sticky='nsew')
+
+def play_again(event=False):
+    global end_screen, game
+    end_screen = False
+    game = pong.Game(game_frm, scores)
+
+# Animation loop
+def move_ball():
+    if frame == 3:
+        global end_screen
+        if not game.over():
+            game.draw()
+        elif not end_screen:
+            scores.append(game.ball.score)
+            game.over_screen()
+            end_screen = True
+    window2.after(10, move_ball)
 
 ### WINDOW
 window2 = tk.Tk()
@@ -115,6 +140,11 @@ window.geometry("1280x400")
 window.rowconfigure(0, weight=1, minsize=400)
 window.columnconfigure(0, weight=1, minsize=1280)
 
+game_frm = tk.Frame(window2)
+# game_frm.rowconfigure(0, weight=1, minsize=400)
+# game_frm.columnconfigure(0, weight=1, minsize=300)
+# game_frm.columnconfigure(1, weight=1, minsize=900)
+game = pong.Game(game_frm, scores)
 
 
 ### NATALIA TIME
@@ -197,9 +227,12 @@ def exit_function():
 
 window2.after(100, update_time)
 window2.after(SLIDESHOW_TIME, update_photo)
+window2.after(100, move_ball)
 switch_frame()
-window.bind('a', switch_frame)
-window2.bind('a', switch_frame)
+window.bind_all('a', switch_frame)
+# window2.bind('a', switch_frame)
+window.bind_all('r', play_again)
+# window2.bind('r', play_again)
 window.protocol('WM_DELETE_WINDOW', exit_function)
 window2.mainloop()
 # window2.mainloop()
