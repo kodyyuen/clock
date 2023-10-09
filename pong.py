@@ -18,7 +18,6 @@ class Ball:
     def draw(self):
         self.canvas.move(self.id, self.xspeed, self.yspeed)
         pos = self.canvas.coords(self.id)
-        # print(pos)
         if pos[1] <= 0:
             self.yspeed = 3
         if pos[3] >= 400:

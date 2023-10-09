@@ -110,7 +110,7 @@ def switch_frame(event = False):
         play_again()
         game_frm.grid(row=0, column=0, sticky='nsew')
 
-def play_again(event=False):
+def play_again(event = False):
     global end_screen, game
     end_screen = False
     game = pong.Game(game_frm, scores)
@@ -139,12 +139,6 @@ window.title("Time In balls")
 window.geometry("1280x400")
 window.rowconfigure(0, weight=1, minsize=400)
 window.columnconfigure(0, weight=1, minsize=1280)
-
-game_frm = tk.Frame(window2)
-# game_frm.rowconfigure(0, weight=1, minsize=400)
-# game_frm.columnconfigure(0, weight=1, minsize=300)
-# game_frm.columnconfigure(1, weight=1, minsize=900)
-game = pong.Game(game_frm, scores)
 
 
 ### NATALIA TIME
@@ -212,6 +206,12 @@ photos_lbl_img = tk.Label(master=photos_frm, image=photos_img, borderwidth=0)
 photos_lbl_img.place(relx=.5, rely=.5, anchor=tk.CENTER)
 
 # photos_frm.place()
+
+game_frm = tk.Frame(window2)
+# game_frm.rowconfigure(0, weight=1, minsize=400)
+# game_frm.columnconfigure(0, weight=1, minsize=300)
+# game_frm.columnconfigure(1, weight=1, minsize=900)
+game = pong.Game(game_frm, scores)
 
 # change_color(window)
 change_color(window2)
